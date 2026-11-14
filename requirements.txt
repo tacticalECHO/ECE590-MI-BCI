@@ -1,0 +1,6 @@
+moabb>=1.4,<2
+mne>=1.7,<2
+scikit-learn>=1.4,<2
+numpy>=1.26
+pandas>=2
+matplotlib>=3.8

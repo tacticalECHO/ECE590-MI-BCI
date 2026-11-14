@@ -1,0 +1,34 @@
+{
+  "run": "v3_all_definitions",
+  "model": "csp_lda",
+  "direction": "1to2",
+  "subjects": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "fmin": 8.0,
+  "fmax": 32.0,
+  "resample_hz": 128,
+  "n_components": 6,
+  "dataset": "Lee2019_MI offline labeled trials",
+  "within_session": "source session(s) of the chosen direction, stratified 75/25 split per seed",
+  "cross_session": "train on the same 75% of the source session, test on all of the target session",
+  "cross_subject": "leave-one-subject-out: train on all trials of the other selected subjects, test on the same held-out trials as within_session",
+  "cross_subject_matched": "as cross_subject, but train on a class- and subject-stratified sample of other subjects' trials matching the within_session training size",
+  "cross_subject_all_trials": "original definition: same LOSO model as cross_subject, tested on all trials of the held-out subject, seed-independent"
+}

@@ -1,0 +1,2 @@
+train_session,test_session,within_session_mean,within_session_sd_across_subjects,cross_session_mean,cross_session_sd_across_subjects,G_session_mean,G_session_sd_across_subjects
+2,1,0.8001282051282053,0.11141719018876531,0.5996,0.09900656543886369,0.20052820512820513,0.10641567270738192
