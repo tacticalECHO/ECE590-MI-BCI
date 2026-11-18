@@ -53,8 +53,11 @@ def evaluate_split(build_model, data, train_ids, test_ids, **info):
 
 
 def confusion_counts(predictions):
+    keys = ["experiment", "test_subject", "true_label", "predicted_label"]
+    if "preprocessing" in predictions:
+        keys.insert(0, "preprocessing")
     return (predictions
-            .groupby(["experiment", "test_subject", "true_label", "predicted_label"])
+            .groupby(keys)
             .size()
             .rename("count")
             .reset_index())
@@ -103,6 +106,38 @@ def _bootstrap_ci(values, seed=0):
     rng = np.random.default_rng(seed)
     means = rng.choice(values, size=(N_BOOTSTRAP, len(values)), replace=True).mean(axis=1)
     return np.percentile(means, [2.5, 97.5])
+
+
+def paired_summary(results):
+    """Summarize paired baseline/ICA balanced-accuracy differences."""
+    paired = (results
+              .groupby(["experiment", "test_subject", "preprocessing"])
+              ["balanced_accuracy"].mean()
+              .unstack("preprocessing")[["baseline", "ica"]]
+              .reset_index())
+    paired["delta_ica"] = paired["ica"] - paired["baseline"]
+
+    rows = []
+    for experiment, group in paired.groupby("experiment"):
+        delta = group["delta_ica"].to_numpy()
+        low, high = _bootstrap_ci(delta)
+        p_value = (wilcoxon(delta).pvalue
+                   if len(delta) > 1 and np.any(delta != 0) else np.nan)
+        rows.append({
+            "experiment": experiment,
+            "n_subjects": len(delta),
+            "baseline_mean": group["baseline"].mean(),
+            "ica_mean": group["ica"].mean(),
+            "delta_ica_mean": delta.mean(),
+            "delta_ica_median": np.median(delta),
+            "delta_ci95_low": low,
+            "delta_ci95_high": high,
+            "n_improved": int((delta > 0).sum()),
+            "n_worsened": int((delta < 0).sum()),
+            "n_unchanged": int((delta == 0).sum()),
+            "wilcoxon_p": p_value,
+        })
+    return paired, pd.DataFrame(rows)
 
 
 def group_statistics(subject_summary):

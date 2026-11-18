@@ -20,15 +20,52 @@ python run_baselines.py --subjects all --direction both --split blocks --tag all
 python run_baselines.py --direction both --tag all54_blocks --plot-only
 ```
 
+Paired cross-subject ICA ablation (1--40 Hz ICA fit, then identical 8--32 Hz
+CSP+LDA evaluation for the baseline and cleaned conditions):
+
+```bash
+python run_ica_ablation.py --subjects all --direction both --split blocks --ica-seed 0 --tag all54_ica
+python run_ica_ablation.py --subjects all --direction both --split blocks --ica-seed 1 --tag all54_ica_seed1
+python run_ica_ablation.py --subjects all --direction both --split blocks --ica-seed 2 --tag all54_ica_seed2
+```
+
+Lee2019_MI has no dedicated EOG channel, so the ICA experiment uses Fp1/Fp2 as
+pre-declared ocular proxies and removes at most two automatically flagged
+components per subject/session recording (absolute correlation threshold 0.3).
+This is label-free recording-level
+preprocessing; the held-out recording contributes unlabeled data to its own ICA
+decomposition. The run config records this scope explicitly.
+
+### ICA stability result
+
+The full 54-subject experiment was repeated with three FastICA initialization
+seeds. Delta is ICA minus baseline balanced accuracy.
+
+| ICA seed | Cross-subject delta | Wilcoxon p | All-trials delta | Wilcoxon p |
+|---:|---:|---:|---:|---:|
+| 0 | -0.00141 | 0.0939 | -0.00120 | 0.1510 |
+| 1 | +0.00058 | 0.2192 | +0.00083 | 0.2123 |
+| 2 | -0.00279 | 0.0158 | -0.00241 | 0.0178 |
+
+Across the three ICA seeds, the mean delta was -0.00121 for `cross_subject`
+and -0.00093 for `cross_subject_all_trials`. All 108 subject/session ICA fits
+converged for every seed. The direction varies slightly with initialization,
+but ICA does not provide a stable improvement over the paired baseline. Seed 2
+shows a small negative signed-rank result, while its bootstrap confidence
+interval for the mean still includes zero.
+
 | Option | Values |
 |---|---|
 | `--subjects` | `all` or comma-separated IDs (1-54) |
 | `--direction` | `1to2`, `2to1`, `both` |
 | `--split` | `random` (stratified 75/25 per seed), `chrono` (last 25% held out), `blocks` (4 contiguous time blocks) |
 | `--seeds` | comma-separated split seeds, default `0..9` |
+| `--ica-seed` | FastICA initialization seed (ICA runner only) |
 | `--tag` | run folder name; existing runs are never overwritten |
 
 Results are written to `results/<model>/<direction>/<tag>/`.
+ICA-ablation results are written to
+`results/ica_ablation/csp_lda/<direction>/<tag>/`.
 
 ## Conditions
 
@@ -50,8 +87,10 @@ data/loader.py              Lee2019 loading, caching, session directions
 models/csp_lda.py           CSP + LDA pipeline
 models/eegnet.py            EEGNet (not implemented yet)
 experiments/                within-session, cross-session, cross-subject runs
+experiments/ica_ablation.py paired recording-level ICA ablation
 utils/metrics.py            scores, gap tables, statistics
 utils/plotting.py           figures
 run_baselines.py            command-line entry point
+run_ica_ablation.py         ICA ablation command-line entry point
 results/                    saved runs
 ```

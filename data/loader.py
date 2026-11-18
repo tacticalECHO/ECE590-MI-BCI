@@ -22,6 +22,8 @@ class EEGData:
     y: np.ndarray
     subject: np.ndarray
     session: np.ndarray
+    sfreq: float
+    ch_names: tuple[str, ...]
 
     def ids(self, subject=None, session=None, exclude_subject=None):
         mask = np.ones(len(self.y), dtype=bool)
@@ -72,7 +74,10 @@ def download_lee2019(subjects, retries=3):
 def _load_subject(subject, fmin, fmax, resample):
     dataset = Lee2019_MI(train_run=True, test_run=False)
     paradigm = LeftRightImagery(fmin=fmin, fmax=fmax, resample=resample)
-    X, y, meta = paradigm.get_data(dataset=dataset, subjects=[subject])
+    epochs, y, meta = paradigm.get_data(
+        dataset=dataset, subjects=[subject], return_epochs=True
+    )
+    X = epochs.get_data(copy=False)
     meta = meta.reset_index(drop=True)
     if not len(X) == len(y) == len(meta):
         raise RuntimeError(f"Subject {subject}: epoch, label and metadata counts do not match")
@@ -81,13 +86,16 @@ def _load_subject(subject, fmin, fmax, resample):
         "y": np.asarray(y, dtype=str),
         "subject": meta["subject"].to_numpy(dtype=int),
         "session": np.asarray(meta["session"], dtype=str),
+        "sfreq": np.asarray(epochs.info["sfreq"], dtype=float),
+        "ch_names": np.asarray(epochs.ch_names, dtype=str),
     }
 
 
 def _cached_subject(subject, fmin, fmax, resample, cache_dir):
     if cache_dir is None:
         return _load_subject(subject, fmin, fmax, resample)
-    path = Path(cache_dir) / f"lee2019_mi_{fmin:g}-{fmax:g}Hz_{resample}Hz" / f"subject_{subject:02d}.npz"
+    path = (Path(cache_dir) / f"lee2019_mi_v2_{fmin:g}-{fmax:g}Hz_{resample}Hz"
+            / f"subject_{subject:02d}.npz")
     if path.exists():
         with np.load(path) as cached:
             return {key: cached[key] for key in cached.files}
@@ -106,7 +114,19 @@ def load_lee2019(subjects, fmin=8.0, fmax=32.0, resample=128, cache_dir=DEFAULT_
         print(f"\rLoaded {i}/{len(subjects)} subjects", end="", flush=True)
     print()
 
-    data = EEGData(**{key: np.concatenate([p[key] for p in parts]) for key in parts[0]})
+    sfreqs = {float(p["sfreq"]) for p in parts}
+    channel_sets = {tuple(p["ch_names"].astype(str)) for p in parts}
+    if len(sfreqs) != 1 or len(channel_sets) != 1:
+        raise RuntimeError("Subjects do not have matching sampling rates and EEG channels")
+
+    data = EEGData(
+        X=np.concatenate([p["X"] for p in parts]),
+        y=np.concatenate([p["y"] for p in parts]),
+        subject=np.concatenate([p["subject"] for p in parts]),
+        session=np.concatenate([p["session"] for p in parts]),
+        sfreq=sfreqs.pop(),
+        ch_names=channel_sets.pop(),
+    )
     for subject in subjects:
         sessions = data.sessions(subject)
         if len(sessions) != 2:

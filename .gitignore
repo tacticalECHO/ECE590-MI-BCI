@@ -4,3 +4,8 @@ __pycache__/
 archive/
 *.zip
 *.tmp.npz
+
+# Local submission staging
+/tmp/
+/upload/
+/ECE590_Motor_Imagery_BCI_Proposal_Revised(1).pdf

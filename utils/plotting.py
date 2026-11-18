@@ -28,6 +28,26 @@ def _save(fig, path):
     plt.close(fig)
 
 
+def plot_paired_effects(summary, path):
+    """Plot each subject's balanced accuracy before and after ICA."""
+    experiments = summary["experiment"].unique()
+    fig, axes = plt.subplots(1, len(experiments), figsize=(6 * len(experiments), 5),
+                             squeeze=False)
+    for ax, experiment in zip(axes[0], experiments):
+        rows = summary[summary["experiment"] == experiment]
+        for _, row in rows.iterrows():
+            color = "tab:green" if row["delta_ica"] > 0 else "tab:red"
+            ax.plot([0, 1], [row["baseline"], row["ica"]], color=color, alpha=.35)
+        ax.scatter(np.zeros(len(rows)), rows["baseline"], s=18)
+        ax.scatter(np.ones(len(rows)), rows["ica"], s=18)
+        _chance_line(ax)
+        ax.set_xticks([0, 1], ["Baseline", "ICA"])
+        ax.set_ylim(0, 1)
+        ax.set_ylabel("Balanced accuracy")
+        ax.set_title(experiment.replace("_", " "))
+    _save(fig, path)
+
+
 def _direction_tag(out_dir):
     config_path = out_dir / "config.json"
     if not config_path.exists():
