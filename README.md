@@ -80,6 +80,32 @@ Gaps: `G_session = within_session - cross_session`, `G_subject = within_session 
 
 `cross_subject_matched` (a pooled sample of other subjects matched to the within-session training size) is a supplementary control kept in the CSV files only.
 
+## Results
+
+CSP (6 components) + LDA, all 54 subjects, both session directions. Values are the mean over subjects of balanced accuracy (conditions) or balanced-accuracy difference (gaps), with bootstrap 95% CIs over subjects. Wilcoxon p-values are one-sided against 0.5 for conditions and two-sided against 0 for gaps.
+
+| Metric | Random split, 10 seeds | p | Time blocks, 4 folds | p |
+|---|---|---|---|---|
+| `within_session` | 0.707 [0.669, 0.747] | < 1e-9 | 0.711 [0.673, 0.750] | < 1e-9 |
+| `cross_session` | 0.618 [0.583, 0.656] | < 1e-9 | 0.617 [0.582, 0.656] | < 1e-8 |
+| `cross_subject` | 0.646 [0.614, 0.680] | < 1e-9 | 0.647 [0.616, 0.682] | < 1e-9 |
+| `G_session` | 0.088 [0.069, 0.109] | < 1e-9 | 0.093 [0.073, 0.115] | < 1e-8 |
+| `G_subject` | 0.061 [0.030, 0.093] | 0.001 | 0.063 [0.033, 0.095] | < 0.001 |
+
+| Direction | `within_session` | `cross_session` | `G_session` | `G_subject` |
+|---|---|---|---|---|
+| Session 1 → 2 | 0.694 | 0.624 | 0.070 | 0.052 |
+| Session 2 → 1 | 0.727 | 0.611 | 0.116 | 0.075 |
+
+Direction values are from the time-block split.
+
+- Both gaps are positive and significant. Generalizing to a new session costs more than generalizing to a new subject when the cross-subject model is trained on all 53 other subjects.
+- The cross-subject model uses about 140 times more training trials than the within-session model, so `G_subject` is a conservative estimate of the subject shift.
+- Random and time-block splits agree (per-subject within-session correlation 0.97), so the random split does not inflate within-session accuracy through temporal leakage.
+- Within-session accuracy is significantly above chance (binomial test, p < 0.05) for 43 of 54 subjects.
+
+Full tables and figures are in `results/csp_lda/both/all54_random` and `results/csp_lda/both/all54_blocks`.
+
 ## Layout
 
 ```
