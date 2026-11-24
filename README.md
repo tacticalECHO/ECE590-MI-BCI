@@ -67,6 +67,19 @@ Results are written to `results/<model>/<direction>/<tag>/`.
 ICA-ablation results are written to
 `results/ica_ablation/csp_lda/<direction>/<tag>/`.
 
+### EEGNet
+
+EEGNet-8,2 requires PyTorch in the project environment.
+
+```bash
+python run_eegnet.py
+```
+
+By default, it evaluates all 54 Lee2019 subjects in both session directions using four contiguous time blocks.
+It reports balanced accuracy for the conditions below, including the supplementary matched-training-size control.
+Edit the constants at the top of `run_eegnet.py` to change the run settings.
+Tables and figures are saved under `results/eegnet/<direction>/<tag>/`.
+
 ## Conditions
 
 | Name | Training data | Test data |
@@ -111,12 +124,13 @@ Full tables and figures are in `results/csp_lda/both/all54_random` and `results/
 ```
 data/loader.py              Lee2019 loading, caching, session directions
 models/csp_lda.py           CSP + LDA pipeline
-models/eegnet.py            EEGNet (not implemented yet)
+models/eegnet.py            PyTorch EEGNet-8,2 model and training
 experiments/                within-session, cross-session, cross-subject runs
 experiments/ica_ablation.py paired recording-level ICA ablation
 utils/metrics.py            scores, gap tables, statistics
 utils/plotting.py           figures
 run_baselines.py            command-line entry point
+run_eegnet.py               EEGNet time-block evaluation entry point
 run_ica_ablation.py         ICA ablation command-line entry point
 results/                    saved runs
 ```
