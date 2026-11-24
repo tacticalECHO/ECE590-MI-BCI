@@ -9,3 +9,7 @@ archive/
 /tmp/
 /upload/
 /ECE590_Motor_Imagery_BCI_Proposal_Revised(1).pdf
+
+# Local EEGNet experiments
+/akn_learning/
+/results/eegnet/*/[0-9]*_blocks/
