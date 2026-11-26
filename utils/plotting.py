@@ -48,6 +48,39 @@ def plot_paired_effects(summary, path):
     _save(fig, path)
 
 
+def plot_sensitivity(summary, path):
+    panels = ["within_session", "cross_session", "cross_subject", "G_session", "G_subject"]
+    summary = summary.assign(n_components=summary["n_components"].astype(int),
+                             variant="CSP reg " + summary["csp_reg"].astype(str)
+                             + ", LDA shrinkage " + summary["lda_shrinkage"].astype(str))
+    variants = sorted(summary["variant"].unique())
+    fig, axes = plt.subplots(2, 3, figsize=(15, 8))
+    for ax, metric in zip(axes.flat, panels):
+        rows = summary[summary["metric"] == metric]
+        for i, variant in enumerate(variants):
+            line = rows[rows["variant"] == variant].sort_values("n_components")
+            x = line["n_components"] + (i - (len(variants) - 1) / 2) * 0.12
+            ax.errorbar(x, line["mean"], yerr=[line["mean"] - line["ci95_low"], line["ci95_high"] - line["mean"]],
+                        marker="o", capsize=3, label=variant)
+        default = rows[rows["is_default"].astype(str) == "True"]
+        ax.scatter(default["n_components"], default["mean"], s=160, facecolors="none",
+                   edgecolors="black", zorder=5, label="default configuration")
+        if metric in GAPS:
+            ax.axhline(0, linewidth=1, color="gray")
+            ax.set_ylabel("Gap in balanced accuracy")
+        else:
+            _chance_line(ax)
+            ax.set_ylabel("Balanced accuracy")
+        ax.set_xticks(sorted(summary["n_components"].unique()))
+        ax.set_xlabel("CSP components")
+        ax.set_title(metric.replace("_", " "))
+    handles, labels = axes.flat[0].get_legend_handles_labels()
+    axes.flat[-1].axis("off")
+    axes.flat[-1].legend(handles, labels, loc="center")
+    fig.suptitle("CSP+LDA sensitivity: subject mean with bootstrap 95% CI")
+    _save(fig, path)
+
+
 def _direction_tag(out_dir):
     config_path = out_dir / "config.json"
     if not config_path.exists():

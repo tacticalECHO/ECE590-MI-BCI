@@ -20,6 +20,13 @@ python run_baselines.py --subjects all --direction both --split blocks --tag all
 python run_baselines.py --direction both --tag all54_blocks --plot-only
 ```
 
+CSP+LDA hyperparameter sensitivity (20 configurations on the same time-block splits; `--resume` continues an interrupted run, `--n-jobs` sets how many configurations run in parallel, each needing up to about 14 GB of memory with all 54 subjects):
+
+```bash
+python run_sensitivity.py --subjects all --split blocks --tag all54_blocks --n-jobs 1
+python run_sensitivity.py --subjects all --split blocks --tag all54_blocks --n-jobs 1 --resume
+```
+
 Paired cross-subject ICA ablation (1--40 Hz ICA fit, then identical 8--32 Hz
 CSP+LDA evaluation for the baseline and cleaned conditions):
 
@@ -119,6 +126,26 @@ Direction values are from the time-block split.
 
 Full tables and figures are in `results/csp_lda/both/all54_random` and `results/csp_lda/both/all54_blocks`.
 
+### CSP+LDA sensitivity
+
+The baseline configuration (6 CSP components, no CSP regularization, LDA without shrinkage) was compared with a grid of 20 configurations: 2, 4, 6, 8 or 10 CSP components × CSP covariance regularization (none or Ledoit-Wolf) × LDA shrinkage (none or automatic). Every configuration was evaluated on the same 54 subjects, both directions and the same four time-block folds. No configuration was selected on the test data; the default configuration reproduces the main time-block results exactly.
+
+| Metric | Default | Range over 20 configurations | Best configuration | Best minus default | Default rank |
+|---|---|---|---|---|---|
+| `within_session` | 0.711 | 0.650 – 0.719 | 10 components, no regularization | +0.008 | 9 |
+| `cross_session` | 0.617 | 0.596 – 0.624 | 6 components, Ledoit-Wolf + shrinkage | +0.007 | 9 |
+| `cross_subject` | 0.647 | 0.514 – 0.654 | 8 components, shrinkage | +0.007 | 11 |
+| `G_session` | 0.093 | 0.052 – 0.109 | | | |
+| `G_subject` | 0.063 | 0.057 – 0.139 | | | |
+
+- `G_session` and `G_subject` are significantly positive in all 20 configurations (largest Wilcoxon p = 1e-6 and 0.002; smallest lower CI bound 0.035 and 0.027). All three conditions are above chance in every configuration.
+- With 6 or more components, every accuracy is within 0.01 of the best configuration, much less than the width of the subject-level CIs (about ±0.04). Per-subject within-session accuracy correlates with the default at r ≥ 0.91 for every configuration.
+- The number of components is the only setting with a large effect. Two components leave cross-subject accuracy near chance (0.514), which inflates `G_subject` to 0.139; from 6 components on, `G_subject` stays between 0.057 and 0.070.
+- `G_session` grows with the number of components (0.052 at 2, 0.109 at 10): extra components raise within-session accuracy but not cross-session accuracy, so they capture session-specific patterns.
+- Regularization and shrinkage change any accuracy by at most 0.011 for a fixed number of components. At 6 components they raise cross-session accuracy by 0.007 and lower `G_session` from 0.093 to 0.081.
+
+Tables and the figure are in `results/csp_lda_sensitivity/both/all54_blocks` (`robustness.csv`, `sensitivity_summary.csv`, `sensitivity.png`); per-configuration results are under `configs/`.
+
 ## Layout
 
 ```
@@ -127,10 +154,12 @@ models/csp_lda.py           CSP + LDA pipeline
 models/eegnet.py            PyTorch EEGNet-8,2 model and training
 experiments/                within-session, cross-session, cross-subject runs
 experiments/ica_ablation.py paired recording-level ICA ablation
+experiments/sensitivity.py  CSP+LDA hyperparameter grid
 utils/metrics.py            scores, gap tables, statistics
 utils/plotting.py           figures
 run_baselines.py            command-line entry point
 run_eegnet.py               EEGNet time-block evaluation entry point
 run_ica_ablation.py         ICA ablation command-line entry point
+run_sensitivity.py          CSP+LDA sensitivity command-line entry point
 results/                    saved runs
 ```

@@ -1,0 +1,179 @@
+{
+  "run": "all54_blocks",
+  "model": "csp_lda",
+  "direction": "both",
+  "split": "blocks",
+  "subjects": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "fmin": 8.0,
+  "fmax": 32.0,
+  "resample_hz": 128,
+  "default": {
+    "n_components": 6,
+    "csp_reg": null,
+    "lda_shrinkage": null
+  },
+  "grid": [
+    {
+      "n_components": 2,
+      "csp_reg": null,
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 4,
+      "csp_reg": null,
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 6,
+      "csp_reg": null,
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 8,
+      "csp_reg": null,
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 10,
+      "csp_reg": null,
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 2,
+      "csp_reg": null,
+      "lda_shrinkage": "auto"
+    },
+    {
+      "n_components": 4,
+      "csp_reg": null,
+      "lda_shrinkage": "auto"
+    },
+    {
+      "n_components": 6,
+      "csp_reg": null,
+      "lda_shrinkage": "auto"
+    },
+    {
+      "n_components": 8,
+      "csp_reg": null,
+      "lda_shrinkage": "auto"
+    },
+    {
+      "n_components": 10,
+      "csp_reg": null,
+      "lda_shrinkage": "auto"
+    },
+    {
+      "n_components": 2,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 4,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 6,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 8,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 10,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": null
+    },
+    {
+      "n_components": 2,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": "auto"
+    },
+    {
+      "n_components": 4,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": "auto"
+    },
+    {
+      "n_components": 6,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": "auto"
+    },
+    {
+      "n_components": 8,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": "auto"
+    },
+    {
+      "n_components": 10,
+      "csp_reg": "ledoit_wolf",
+      "lda_shrinkage": "auto"
+    }
+  ],
+  "selection": "no configuration is selected; every configuration is evaluated on the same splits"
+}
